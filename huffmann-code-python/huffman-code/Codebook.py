@@ -34,11 +34,17 @@
 # For more information, please refer to <https://unlicense.org/>
 # -----------------------------------------------------------------------
 
+import heapq
 
 class Codebook:
     def __init__(self):
         self.alphabet = None
         self.tree = None
+
+        self.message = None
+
+        self.forward_map = None
+        self.backward_map = None
 
     @staticmethod
     def _to_bytes(message: str):
@@ -48,11 +54,44 @@ class Codebook:
     def _to_string(byte_message:bytes):
         return byte_message.decode(encoding='utf-8', errors='strict')
 
+inv_map = dict(zip(my_map.values(), my_map.keys()))
 
+# /**
+#  * dictionary // Zuordnungstabelle für das Codebuch
+#  */
+#  // Diese rekursive Funktion erzeugt das Codebuch für die Huffman-Kodierung und speichert es in der Variable dictionary
+#  function createDictionary(node, codeword, dictionary)
+#  {
+#    if (der Knoten ist node ist leer)
+#    {
+#        return; // Abbruchbedingung, wenn kein linker oder rechter Teilbaum vorhanden ist
+#    }
+#    if (node->symbol is kein innerer Knoten, also ein Blatt) // Wenn der Knoten kein innerer Knoten, also ein Blatt ist
+#    {
+#        dictionary.insert(node->symbol, codeword); // Fügt die Kombination aus Symbol und Codewort dem Codebuch hinzu
+#        return; // Verlässt die Funktion
+#    }
+#    createDictionary(node->left, concat(codeword, "0"), dictionary) // Rekusiver Aufruf für den linken Teilbaum, das Codesymbol 0 für die linke Kante wird angefügt
+#    createDictionary(node->right, concat(codeword, "1"), dictionary) // Rekusiver Aufruf für den rechten Teilbaum, das Codesymbol 1 für die rechte Kante wird angefügt
+#  }
 
+class HuffmannTree:
+    def __init__(self):
+        self.heap = None
 
-# TODO: Think about configuration, alphabet definition, update, mapping
+    ''' 
+    Use the min heap structure to fetch left and right node leaves with minimal leftover probability
+    '''
+    def generate(self, probability:list, symbols:list):
+        mapping = dict(zip(probability, symbols))
+        demapping = dict(zip(symbols,probability))
 
-# _string = "Some String"
-# _string_as_bytes = bytes(_string, 'utf-8')
-#bytes(_string="test",_enc='utf-8')
+        self.heap = probability
+        heapq.heapify(self.heap)
+
+        while len(self.heap) > 1:
+            left = heapq.heappop(self.heap)
+            right = heapq.heappop(self.heap)
+
+            top = left + right
+            heapq.heappush(self.heap, top)

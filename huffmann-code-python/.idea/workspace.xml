@@ -4,13 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9b5eba81-0261-4e36-ba55-f545ac43d033" name="Changes" comment="[CLEANUP] Streamlining encoder/decoder. Next, set up wire through pipeline to test, then follow up with implementation on codebook.">
-      <change afterPath="$PROJECT_DIR$/huffman_code/__init__.py" afterDir="false" />
+    <list default="true" id="9b5eba81-0261-4e36-ba55-f545ac43d033" name="Changes" comment="[FEATURE] Draft of a main script testing encoder/decoder pipeline">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/huffman-code/Codebook.py" beforeDir="false" afterPath="$PROJECT_DIR$/huffman_code/Codebook.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/huffman-code/Decoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/huffman_code/Decoder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/huffman-code/Encoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/huffman_code/Encoder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/huffman-code/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/huffman_code/Codebook.py" beforeDir="false" afterPath="$PROJECT_DIR$/huffman_code/Codebook.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +68,7 @@
     "ignore.virus.scanning.warn.message": "true",
     "last_opened_file_path": "C:/Users/kiwi/Desktop/Projects/FEC/fec-huffman-code/huffmann-code-python",
     "run.code.analysis.last.selected.profile": "aDefault",
-    "settings.editor.selected.configurable": "project.propVCSSupport.ChangelistConflict"
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -94,8 +91,8 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="C:\Users\kiwi\Desktop\Projects\FEC\fec-huffman-code\huffmann-code-python\main.py" />
-      <option name="PARAMETERS" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="PARAMETERS" value="--data test" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -171,7 +168,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742133040487</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="[FEATURE] Draft of a main script testing encoder/decoder pipeline">
+      <option name="closed" value="true" />
+      <created>1742139967781</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1742139967781</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -232,7 +237,8 @@
     <MESSAGE value=" Preparation of codebook implementation." />
     <MESSAGE value="WIP Huffmann tree implementation as min heap" />
     <MESSAGE value="[CLEANUP] Streamlining encoder/decoder. Next, set up wire through pipeline to test, then follow up with implementation on codebook." />
-    <option name="LAST_COMMIT_MESSAGE" value="[CLEANUP] Streamlining encoder/decoder. Next, set up wire through pipeline to test, then follow up with implementation on codebook." />
+    <MESSAGE value="[FEATURE] Draft of a main script testing encoder/decoder pipeline" />
+    <option name="LAST_COMMIT_MESSAGE" value="[FEATURE] Draft of a main script testing encoder/decoder pipeline" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

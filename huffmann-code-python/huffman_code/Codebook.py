@@ -56,6 +56,9 @@ class Codebook:
     def _to_string(byte_message:bytes):
         return byte_message.decode(encoding='utf-8', errors='strict')
 
+    def _print_codeword(self):
+        print(self.codeword)
+
     def map(self):
         return self.codeword
 

@@ -1,7 +1,7 @@
 # *     Project: huffman-code-python
-# *      Module: huffman-code
-# *      Script: Encoder.py
-# * Description: Forward-Error-Correction (FEC) encoder, system module abstraction of communication link, message (input) -> codeword (output)
+# *      Module: huffman_code
+# *      Script: Decoder.py
+# * Description: Forward-Error-Correction (FEC) decoder, system module abstraction of communication link, codeword (input) -> input (output)
 # *
 # *  Created on: Feb 24, 2025
 # *      Author: Vivian Becher
@@ -34,18 +34,17 @@
 # For more information, please refer to <https://unlicense.org/>
 # -----------------------------------------------------------------------
 
+from .Codebook import Codebook
 
-from Codebook import Codebook
-
-class Encoder:
+class Decoder:
     def __init__(self):
-        self.message = None
-
         self.codebook = None
         self.codeword = None
 
-    def encode(self, message:str):
-        self.message = message
-        self.codebook = Codebook(message)
-        self.codeword = self.codebook.map()
-        return self.codeword
+        self.message = None
+
+    def decode(self, codebook: Codebook, codeword:str):
+        self.codebook = codebook
+        self.codeword = codeword
+        self.message = self.codebook.demap()
+        return self.message

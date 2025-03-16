@@ -1,5 +1,5 @@
 # *     Project: huffman-code-python
-# *      Module: huffman-code
+# *      Module: huffman_code
 # *      Script: Codeboook.py
 # * Description: Core logic of mapping/demapping from finite alphabet.
 # *

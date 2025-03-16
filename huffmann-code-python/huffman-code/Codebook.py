@@ -37,14 +37,16 @@
 import heapq
 
 class Codebook:
-    def __init__(self):
+    def __init__(self, message:str):
+        self.message = message
+
+        self.codeword = None
+
         self.alphabet = None
         self.tree = None
 
-        self.message = None
-
-        self.forward_map = None
-        self.backward_map = None
+        self.mapping = None
+        self.demapping = None
 
     @staticmethod
     def _to_bytes(message: str):
@@ -54,7 +56,13 @@ class Codebook:
     def _to_string(byte_message:bytes):
         return byte_message.decode(encoding='utf-8', errors='strict')
 
-inv_map = dict(zip(my_map.values(), my_map.keys()))
+    def map(self):
+        return self.codeword
+
+    def demap(self):
+        return self.message
+
+    #inv_map = dict(zip(my_map.values(), my_map.keys()))
 
 # /**
 #  * dictionary // Zuordnungstabelle für das Codebuch

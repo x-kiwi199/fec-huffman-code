@@ -35,21 +35,17 @@
 # -----------------------------------------------------------------------
 
 
-import Codebook
+from Codebook import Codebook
 
 class Encoder:
     def __init__(self):
-        self.codebook = None
-
-        self.codeword = None
         self.message = None
-        pass
+
+        self.codebook = None
+        self.codeword = None
 
     def encode(self, message:str):
         self.message = message
-        self.codeword = self.message
+        self.codebook = Codebook(message)
+        self.codeword = self.codebook.map()
         return self.codeword
-
-    def initialize(self):
-        pass
-

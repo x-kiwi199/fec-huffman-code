@@ -34,20 +34,17 @@
 # For more information, please refer to <https://unlicense.org/>
 # -----------------------------------------------------------------------
 
-import Codebook
+from Codebook import Codebook
 
 class Decoder:
     def __init__(self):
         self.codebook = None
-
         self.codeword = None
+
         self.message = None
-        pass
 
-    def decode(self, codeword:str):
-        self.codeword = self.codeword
-        self.message = codeword
+    def decode(self, codebook: Codebook, codeword:str):
+        self.codebook = codebook
+        self.codeword = codeword
+        self.message = self.codebook.demap()
         return self.message
-
-    def initialize(self):
-        pass

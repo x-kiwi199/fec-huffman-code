@@ -35,18 +35,40 @@
 # -----------------------------------------------------------------------
 
 import heapq
+from collections import Counter
 
 class Codebook:
     def __init__(self, message:str):
         self.message = message
-
         self.codeword = None
+
+        self.counter = self.histogram()
 
         self.alphabet = None
         self.tree = None
 
         self.mapping = None
         self.demapping = None
+
+
+# class MyData:
+#     def __init__(self, data):
+#         #"Initialize MyData from a sequence"
+#         self.data = data
+#
+#     @ classmethod
+#     def fromfilename(cls, filename):
+#         #"Initialize MyData from a file"
+#         data = open(filename).readlines()
+#         return cls(data)
+#
+#     @classmethod
+#     def fromdict(cls, datadict):
+#         #"Initialize MyData from a dict's items"
+#         return cls(datadict.items())
+
+    def histogram(self):
+        return Counter(self.message)
 
     @staticmethod
     def _to_bytes(message: str):
@@ -59,11 +81,14 @@ class Codebook:
     def _print_codeword(self):
         print(self.codeword)
 
+
     def map(self):
         return self.codeword
 
     def demap(self):
         return self.message
+
+
 
     #inv_map = dict(zip(my_map.values(), my_map.keys()))
 
@@ -95,7 +120,7 @@ class HuffmannTree:
     '''
     def generate(self, probability:list, symbols:list):
         mapping = dict(zip(probability, symbols))
-        demapping = dict(zip(symbols,probability))
+        # demapping = dict(zip(symbols, probability))
 
         self.heap = probability
         heapq.heapify(self.heap)

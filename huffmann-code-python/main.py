@@ -40,7 +40,8 @@
 
 
 import argparse
-from huffman_code import Encoder, Decoder
+from collections import Counter
+from huffman_code import Encoder, Decoder, Codebook
 
 def main():
     parser = argparse.ArgumentParser(description="Test standard encoder/decoder framework based on Huffmann code")
@@ -58,14 +59,17 @@ def main():
     decoder = Decoder()
 
     # Run real test
-    codeword = encoder.encode(original_message)
-    # TODO: Missing codebook instance separation. Or statistics sharing mechanism
-    decoded_message = decoder.decode(codebook=encoder.codebook, codeword=codeword)
+    codeword, tx_codebook = encoder.encode(original_message)
+
+    alphabet_soup = str(Counter(original_message).elements())
+    rx_codebook = Codebook(alphabet_soup)
+
+    decoded_message = decoder.decode(codebook=rx_codebook, codeword=codeword)
 
     print(f"original message: {original_message}")
     print(f"decoded message: {decoded_message}")
 
-    assert original_message == decoded_message, "Decoded data does not match the original!"
+    assert original_message == decoded_message, "DecoderFailure: Decoded data does not match the original!"
 
 if __name__ == "__main__":
     main()

@@ -48,4 +48,4 @@ class Encoder:
         self.message = message
         self.codebook = Codebook(message)
         self.codeword = self.codebook.map()
-        return self.codeword
+        return self.codeword, self.codebook

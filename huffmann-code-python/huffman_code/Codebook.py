@@ -38,37 +38,19 @@ import heapq
 from collections import Counter
 
 class Codebook:
-    def __init__(self, message:str):
+    def __init__(self, message:str) -> None:
         self.message = message
         self.codeword = None
 
-        self.counter = self.histogram()
+        self.counterObj = Counter(self.message)
 
-        self.alphabet = None
-        self.tree = None
+        self.tree = HuffmannTree()
+        self.nodes = []
+        # self.alphabet = None
 
         self.mapping = None
         self.demapping = None
 
-
-# class MyData:
-#     def __init__(self, data):
-#         #"Initialize MyData from a sequence"
-#         self.data = data
-#
-#     @ classmethod
-#     def fromfilename(cls, filename):
-#         #"Initialize MyData from a file"
-#         data = open(filename).readlines()
-#         return cls(data)
-#
-#     @classmethod
-#     def fromdict(cls, datadict):
-#         #"Initialize MyData from a dict's items"
-#         return cls(datadict.items())
-
-    def histogram(self):
-        return Counter(self.message)
 
     @staticmethod
     def _to_bytes(message: str):
@@ -81,38 +63,48 @@ class Codebook:
     def _print_codeword(self):
         print(self.codeword)
 
-
     def map(self):
         return self.codeword
 
     def demap(self):
         return self.message
 
+    def start(self):
+        self.counterObj.most_common(None)  # list of tuples of symbol occurrence, e.g. [('a', 5), ('b', 2), ('r', 2)]
+
+        for item in self.counterObj.most_common(None):
+            node = Node()
+
+            self.nodes.append(node)
 
 
-    #inv_map = dict(zip(my_map.values(), my_map.keys()))
 
-# /**
-#  * dictionary // Zuordnungstabelle für das Codebuch
-#  */
-#  // Diese rekursive Funktion erzeugt das Codebuch für die Huffman-Kodierung und speichert es in der Variable dictionary
-#  function createDictionary(node, codeword, dictionary)
-#  {
-#    if (der Knoten ist node ist leer)
-#    {
-#        return; // Abbruchbedingung, wenn kein linker oder rechter Teilbaum vorhanden ist
-#    }
-#    if (node->symbol is kein innerer Knoten, also ein Blatt) // Wenn der Knoten kein innerer Knoten, also ein Blatt ist
-#    {
-#        dictionary.insert(node->symbol, codeword); // Fügt die Kombination aus Symbol und Codewort dem Codebuch hinzu
-#        return; // Verlässt die Funktion
-#    }
-#    createDictionary(node->left, concat(codeword, "0"), dictionary) // Rekusiver Aufruf für den linken Teilbaum, das Codesymbol 0 für die linke Kante wird angefügt
-#    createDictionary(node->right, concat(codeword, "1"), dictionary) // Rekusiver Aufruf für den rechten Teilbaum, das Codesymbol 1 für die rechte Kante wird angefügt
-#  }
+# self.counterObj.elements()
+# statistics = counterObj.elements()
+# inv_map = dict(zip(my_map.values(), my_map.keys()))
+#         mapping = dict(zip(probability, symbols))
+#         # demapping = dict(zip(symbols, probability))
+
+class Node:
+    def __init__(self) -> None:
+        self.probability = None
+        self.symbol = None
+        self.code = None
+
+    def set_probability(self, probability: float):
+        self.probability = probability
+
+    def get_probability(self):
+        return self.probability
+
+    def set_symbol(self, symbol:str):
+        self.symbol = symbol
+
+    def get_symbol(self):
+        return self.symbol
 
 class HuffmannTree:
-    def __init__(self):
+    def __init__(self) -> None:
         self.heap = None
 
     ''' 

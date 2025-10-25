@@ -34,19 +34,28 @@
 # For more information, please refer to <https://unlicense.org/>
 # -----------------------------------------------------------------------
 
+import logging
 from .Codebook import Codebook
 
 class Decoder:
-    def __init__(self):
+    def __init__(self) -> None:
         self.codebook = None
         self.codeword = None
 
         self.message = None
 
-    def decode(self, codebook: Codebook, codeword: str):
-        self.codebook = codebook
+        self.logger = logging.getLogger("DECODER")
+        self.logger.debug("Initializing decoder")
+
+    def decode(self, codeword: str, alphabet_soup: dict) -> str:
         self.codeword = codeword
+        if self.codebook is None:
+            self.codebook = Codebook.from_stats(symbol_stats=alphabet_soup)
+        else:
+            self.logger.warning("Codebook update mechanism not yet implemented")
         self.codebook.codeword = codeword
         self.message = self.codebook.demap()
+        self.logger.debug(f"< codeword: {self.codeword}")
+        self.logger.debug(f"< rx_message: {self.message}")
         return self.message
 

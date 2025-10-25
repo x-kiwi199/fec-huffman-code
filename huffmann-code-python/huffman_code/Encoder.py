@@ -34,18 +34,26 @@
 # For more information, please refer to <https://unlicense.org/>
 # -----------------------------------------------------------------------
 
-
+import logging
 from .Codebook import Codebook
 
 class Encoder:
-    def __init__(self):
+    def __init__(self) -> None:
         self.message = None
 
         self.codebook = None
         self.codeword = None
 
-    def encode(self, message:str):
+        self.logger = logging.getLogger("ENCODER")
+        self.logger.debug("Initializing encoder")
+
+    def encode(self, message:str) -> str:
         self.message = message
-        self.codebook = Codebook(message)
+        if self.codebook is None:
+            self.codebook = Codebook.from_message(message=message)
+        else:
+            self.logger.warning("Codebook update mechanism not yet implemented")
         self.codeword = self.codebook.map()
-        return self.codeword, self.codebook
+        self.logger.debug(f"> tx_message: {self.message}")
+        self.logger.debug(f"> codeword: {self.codeword}")
+        return self.codeword

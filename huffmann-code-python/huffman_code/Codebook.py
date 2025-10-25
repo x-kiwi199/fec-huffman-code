@@ -38,26 +38,93 @@ import heapq
 from collections import Counter
 import itertools
 
+# class Codebook:
+#     def __init__(self):
+#         self.counterObj = None
+#         self.nodes = []
+#         self.mapping = {}
+#         self.demapping = {}
+#         self.tree = HuffmannTree()
+#         self.codeword = None
+#         self.message = None
+#
+#     def fit_from_message(self, message: str):
+#         """Build internal statistics and tree from a raw message."""
+#         self.message = message
+#         self.counterObj = Counter(message)
+#         self._build_tree()
+#
+#     def fit_from_stats(self, stats: dict):
+#         """Rebuild from externally provided statistics."""
+#         self.counterObj = Counter(stats)
+#         self._build_tree()
+#
+#     def _build_tree(self):
+#         self.nodes.clear()
+#         occurrence = sorted(self.counterObj.items(), key=lambda x: (x[1], x[0]))
+#         total = sum(self.counterObj.values())
+#         for symbol, count in occurrence:
+#             node = Node()
+#             node.set_symbol(symbol)
+#             node.set_probability(count / total)
+#             self.nodes.append(node)
+#         self.tree.generate(self.nodes)
+#         self.mapping = {n.get_symbol(): n.get_code() for n in self.nodes if n.get_symbol() is not None}
+#         self.demapping = {v: k for k, v in self.mapping.items()}
+#
+#     def map(self, message: str | None = None) -> str:
+#         if message:
+#             self.message = message
+#         if not self.message or not self.mapping:
+#             raise RuntimeError("Codebook not yet initialized with message or statistics.")
+#         self.codeword = ''.join(self.mapping[s] for s in self.message)
+#         return self.codeword
+#
+#     def demap(self, codeword: str | None = None) -> str:
+#         if codeword:
+#             self.codeword = codeword
+#         if not self.codeword or not self.demapping:
+#             raise RuntimeError("Codebook not yet initialized with statistics.")
+#         decoded, buffer = [], ""
+#         for bit in self.codeword:
+#             buffer += bit
+#             if buffer in self.demapping:
+#                 decoded.append(self.demapping[buffer])
+#                 buffer = ""
+#         return ''.join(decoded)
+
 class Codebook:
-    def __init__(self, message: str = None, symbol_stats: dict = None) -> None:
-        if message:
-            self.message = message
-            self.counterObj = Counter(self.message)
-        elif symbol_stats:
-            self.message = None
-            self.counterObj = Counter(symbol_stats)
-        else:
-            raise ValueError("Either message or symbol_stats must be provided.")
-
+    def __init__(self) -> None:
+        self.role = None        # 'tx' or 'rx' role as codebook lives at runtime as two separated instances
         self.codeword = None
-        self.tree = HuffmannTree()
+        self.message = None
+
+        self.counterObj = None
         self.nodes = []
-        self.mapping = None
-        self.demapping = None
+        self.mapping = {}
+        self.demapping = {}
+        self.tree = HuffmannTree()
 
-        self.start()
-        self.tree.generate(self.nodes)
+    @classmethod
+    def from_message(cls, message: str) -> "Codebook":
+        obj = cls()
+        obj.role = 'tx'
+        obj.message = message
+        counter = Counter(message)
+        obj.counterObj = counter
+        obj.start()
+        obj.tree.generate(obj.nodes)
+        return obj
 
+    @classmethod
+    def from_stats(cls, symbol_stats: dict) -> "Codebook":
+        obj = cls()
+        obj.role = 'rx'
+        counter = Counter(symbol_stats)
+        obj.counterObj = counter
+        obj.start()
+        obj.tree.generate(obj.nodes)
+        return obj
 
     @staticmethod
     def _to_bytes(message: str):
@@ -70,13 +137,13 @@ class Codebook:
     def _print_codeword(self):
         print(self.codeword)
 
-    def map(self):
+    def map(self) -> str:
         symbol_to_code = {node.get_symbol(): node.get_code() for node in self.nodes if node.get_symbol() is not None}
         self.mapping = symbol_to_code
         self.codeword = ''.join(symbol_to_code[s] for s in self.message)
         return self.codeword
 
-    def demap(self):
+    def demap(self) -> str:
         code_to_symbol = {node.get_code(): node.get_symbol() for node in self.nodes if node.get_symbol() is not None}
         buffer = ""
         decoded = []
@@ -96,13 +163,6 @@ class Codebook:
             node.set_symbol(symbol)
             node.set_probability(count / total)
             self.nodes.append(node)
-
-
-# self.counterObj.elements()
-# statistics = counterObj.elements()
-# inv_map = dict(zip(my_map.values(), my_map.keys()))
-#         mapping = dict(zip(probability, symbols))
-#         # demapping = dict(zip(symbols, probability))
 
 class Node:
     def __init__(self) -> None:
@@ -133,14 +193,10 @@ class Node:
 class HuffmannTree:
     def __init__(self) -> None:
         self.heap = None
-
-    ''' 
-    Use the min heap structure to fetch left and right node leaves with minimal leftover probability
-    '''
-
+        self.root = None
 
     def generate(self, nodes: list):
-        counter = itertools.count()  # Unique sequence number
+        counter = itertools.count()         # Unique sequence number
         heap = [[node.get_probability(), next(counter), node] for node in nodes]
         heapq.heapify(heap)
 
@@ -166,5 +222,3 @@ class HuffmannTree:
             return
         self._assign_codes(node.left, code + "0")
         self._assign_codes(node.right, code + "1")
-
-

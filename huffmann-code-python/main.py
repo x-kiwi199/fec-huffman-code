@@ -2,7 +2,7 @@
 # *      Module: -
 # *      Script: main.py
 # * Description: Demonstration of Forward-Error-Correction (FEC) encoder/decoder usage. Communication link system module abstraction.
-# *              [message (unencrypted) -> encoder -> codeword (encrypted) -> decoder -> message(recovered)]
+# *              [message (cleartext) -> encoder -> codeword (encoded) -> decoder -> message(recovered)]
 # *
 # *       Usage: python main.py -h, --h
 #                python main.py -d, --data "12345abc..."
@@ -38,21 +38,32 @@
 # For more information, please refer to <https://unlicense.org/>
 # -----------------------------------------------------------------------
 
-
+import sys
 import argparse
 import logging
 from collections import Counter
-from huffman_code import Encoder, Decoder, Codebook
+from huffman_code import Encoder, Decoder
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Test standard encoder/decoder framework based on Huffmann code")
     parser.add_argument("-d","--data", type=str,
-                        default="Hello, World! Unencrypted 'utf-8' encoded message!",
+                        default="Hello, World! 'utf-8' text-encoded message!",
                         help="verify correct feed trough of DATA",
-                        required=True)
+                        required=False)
     args = parser.parse_args()
+    if len(sys.argv) == 1:
+        parser.print_help()
 
-    # Unencrypted message input as commandline argument
+    # Setup basic logging
+    logger = logging.getLogger("MAIN")
+    logging.basicConfig(
+        level=logging.DEBUG,  # or logging.DEBUG
+        format='%(asctime)s [%(name)s][%(levelname)s] %(message)s',
+        handlers=[logging.StreamHandler()]
+    )
+    logger.info("Running application...")
+
+    # Cleartext message input from commandline argument
     original_message = args.data
 
     # Initialize Encoder and Decoder
@@ -60,17 +71,24 @@ def main():
     decoder = Decoder()
 
     # Run real test
-    codeword, tx_codebook = encoder.encode(message=original_message)
-
+    codeword = encoder.encode(message=original_message)
     alphabet_soup = dict(Counter(original_message))
-    rx_codebook = Codebook(symbol_stats=alphabet_soup)
+    decoded_message = decoder.decode(codeword=codeword, alphabet_soup=alphabet_soup)
 
-    decoded_message = decoder.decode(codebook=rx_codebook, codeword=codeword)
-
-    print(f"original message: {original_message}")
-    print(f"decoded message: {decoded_message}")
-
-    assert original_message == decoded_message, "DecoderFailure: Decoded data does not match the original!"
+    try:
+        if original_message != decoded_message:
+            logging.error("FAILURE! Decoded message does not match the original.")
+            logging.error(f"original message: {original_message}")
+            logging.error(f"decoded message: {decoded_message}")
+            return 1  # non-zero indicates error
+        else:
+            logger.info("SUCCESS! Message correctly recovered.")
+            return 0
+    except Exception as e:
+        logger.exception(f"Unexpected runtime error: {e}")
+        return 2  # non-zero indicates error
+    finally:
+        logger.info("Closing application.")
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

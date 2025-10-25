@@ -40,6 +40,7 @@
 
 
 import argparse
+import logging
 from collections import Counter
 from huffman_code import Encoder, Decoder, Codebook
 
@@ -59,10 +60,10 @@ def main():
     decoder = Decoder()
 
     # Run real test
-    codeword, tx_codebook = encoder.encode(original_message)
+    codeword, tx_codebook = encoder.encode(message=original_message)
 
-    alphabet_soup = str(Counter(original_message).elements())
-    rx_codebook = Codebook(alphabet_soup)
+    alphabet_soup = dict(Counter(original_message))
+    rx_codebook = Codebook(symbol_stats=alphabet_soup)
 
     decoded_message = decoder.decode(codebook=rx_codebook, codeword=codeword)
 

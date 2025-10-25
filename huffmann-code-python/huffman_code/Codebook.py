@@ -36,20 +36,27 @@
 
 import heapq
 from collections import Counter
+import itertools
 
 class Codebook:
-    def __init__(self, message:str) -> None:
-        self.message = message
+    def __init__(self, message: str = None, symbol_stats: dict = None) -> None:
+        if message:
+            self.message = message
+            self.counterObj = Counter(self.message)
+        elif symbol_stats:
+            self.message = None
+            self.counterObj = Counter(symbol_stats)
+        else:
+            raise ValueError("Either message or symbol_stats must be provided.")
+
         self.codeword = None
-
-        self.counterObj = Counter(self.message)
-
         self.tree = HuffmannTree()
         self.nodes = []
-        # self.alphabet = None
-
         self.mapping = None
         self.demapping = None
+
+        self.start()
+        self.tree.generate(self.nodes)
 
 
     @staticmethod
@@ -64,19 +71,31 @@ class Codebook:
         print(self.codeword)
 
     def map(self):
+        symbol_to_code = {node.get_symbol(): node.get_code() for node in self.nodes if node.get_symbol() is not None}
+        self.mapping = symbol_to_code
+        self.codeword = ''.join(symbol_to_code[s] for s in self.message)
         return self.codeword
 
     def demap(self):
+        code_to_symbol = {node.get_code(): node.get_symbol() for node in self.nodes if node.get_symbol() is not None}
+        buffer = ""
+        decoded = []
+        for bit in self.codeword:
+            buffer += bit
+            if buffer in code_to_symbol:
+                decoded.append(code_to_symbol[buffer])
+                buffer = ""
+        self.message = ''.join(decoded)
         return self.message
 
     def start(self):
-        self.counterObj.most_common(None)  # list of tuples of symbol occurrence, e.g. [('a', 5), ('b', 2), ('r', 2)]
-
-        for item in self.counterObj.most_common(None):
+        occurrence = sorted(self.counterObj.items(), key=lambda x: (x[1], x[0]))  # sort by frequency, then symbol
+        total = sum(self.counterObj.values())
+        for symbol, count in occurrence:
             node = Node()
-
+            node.set_symbol(symbol)
+            node.set_probability(count / total)
             self.nodes.append(node)
-
 
 
 # self.counterObj.elements()
@@ -90,6 +109,8 @@ class Node:
         self.probability = None
         self.symbol = None
         self.code = None
+        self.left = None
+        self.right = None
 
     def set_probability(self, probability: float):
         self.probability = probability
@@ -103,6 +124,12 @@ class Node:
     def get_symbol(self):
         return self.symbol
 
+    def set_code(self, code:str):
+        self.code = code
+
+    def get_code(self):
+        return self.code
+
 class HuffmannTree:
     def __init__(self) -> None:
         self.heap = None
@@ -110,16 +137,34 @@ class HuffmannTree:
     ''' 
     Use the min heap structure to fetch left and right node leaves with minimal leftover probability
     '''
-    def generate(self, probability:list, symbols:list):
-        mapping = dict(zip(probability, symbols))
-        # demapping = dict(zip(symbols, probability))
 
-        self.heap = probability
-        heapq.heapify(self.heap)
 
-        while len(self.heap) > 1:
-            left = heapq.heappop(self.heap)
-            right = heapq.heappop(self.heap)
+    def generate(self, nodes: list):
+        counter = itertools.count()  # Unique sequence number
+        heap = [[node.get_probability(), next(counter), node] for node in nodes]
+        heapq.heapify(heap)
 
-            top = left + right
-            heapq.heappush(self.heap, top)
+        while len(heap) > 1:
+            left_prob, _, left_node = heapq.heappop(heap)
+            right_prob, _, right_node = heapq.heappop(heap)
+
+            parent = Node()
+            parent.set_probability(left_prob + right_prob)
+            parent.set_symbol(None)
+            parent.left = left_node
+            parent.right = right_node
+
+            heapq.heappush(heap, [parent.get_probability(), next(counter), parent])
+
+        _, _, root = heap[0]
+        self.root = root
+        self._assign_codes(self.root)
+
+    def _assign_codes(self, node, code=""):
+        if node.get_symbol() is not None:
+            node.set_code(code)
+            return
+        self._assign_codes(node.left, code + "0")
+        self._assign_codes(node.right, code + "1")
+
+

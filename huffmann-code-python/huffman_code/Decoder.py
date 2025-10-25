@@ -43,8 +43,10 @@ class Decoder:
 
         self.message = None
 
-    def decode(self, codebook: Codebook, codeword:str):
+    def decode(self, codebook: Codebook, codeword: str):
         self.codebook = codebook
         self.codeword = codeword
+        self.codebook.codeword = codeword
         self.message = self.codebook.demap()
         return self.message
+

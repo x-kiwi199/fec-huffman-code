@@ -1,5 +1,5 @@
 # *     Project: huffman-code-python
-# *      Module: huffman-code
+# *      Module: huffman_code
 # *      Script: Decoder.py
 # * Description: Forward-Error-Correction (FEC) decoder, system module abstraction of communication link, codeword (input) -> input (output)
 # *
@@ -34,20 +34,28 @@
 # For more information, please refer to <https://unlicense.org/>
 # -----------------------------------------------------------------------
 
-import Codebook
+import logging
+from .Codebook import Codebook
 
 class Decoder:
-    def __init__(self):
+    def __init__(self) -> None:
         self.codebook = None
-
         self.codeword = None
-        self.message = None
-        pass
 
-    def decode(self, codeword:str):
-        self.codeword = self.codeword
-        self.message = codeword
+        self.message = None
+
+        self.logger = logging.getLogger("DECODER")
+        self.logger.debug("Initializing decoder")
+
+    def decode(self, codeword: str, alphabet_soup: dict) -> str:
+        self.codeword = codeword
+        if self.codebook is None:
+            self.codebook = Codebook.from_stats(symbol_stats=alphabet_soup)
+        else:
+            self.logger.warning("Codebook update mechanism not yet implemented")
+        self.codebook.codeword = codeword
+        self.message = self.codebook.demap()
+        self.logger.debug(f"< codeword: {self.codeword}")
+        self.logger.debug(f"< rx_message: {self.message}")
         return self.message
 
-    def initialize(self):
-        pass

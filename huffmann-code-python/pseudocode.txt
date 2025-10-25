@@ -1,0 +1,56 @@
+/**
+ * left // linker Kindknoten
+ * right // rechter Kindknoten
+ * top // Elternknoten
+ * minHeap // Vorrangwarteschlange für den Min-Heap
+ */
+ function createHuffmanTree(symbolList, frequencyList, symbolsCount)
+ {
+   // Fügt die Knoten mit Symbol und Häufigkeit in die Vorrangwarteschlange ein
+   foreach (symbol in symbolList)
+   {
+       Knoten mit Symbol und Häufigkeit in minHeap einfügen
+   }
+   // Der HuffmanTree wird schrittweise erzeugt, bis sich alle Knoten einem Baum befinden und nur noch der Wurzelknoten in der Vorrangwarteschlange ist
+   while (die Anzahl der Knoten in minHeap ist nicht 1) // Solange die Anzahl der Knoten in der Vorrangwarteschlange nicht 1 ist
+   {
+       // Entfernt die zwei Knoten mit der kleinsten Häufigkeit aus der Vorrangwarteschlange
+       left := minHeap.top()
+       minHeap.pop()
+       right := minHeap.top()
+       minHeap.pop()
+       Erzeuge einen neuen inneren Knoten top mit der Summe der Häufigkeiten der zwei Knoten left->frequency und right->frequency
+       // Fügt die zwei Knoten mit der kleinsten Häufigkeit als linken und rechten Kindknoten des neuen inneren Knoten in den Baum ein
+       top->left := left
+       top->right := right
+       minHeap.push(top) // Fügt den neuen Knoten in die Vorrangwarteschlange ein
+   }
+   return minHeap.top() // Gibt einen Zeiger auf den Wurzelknoten zurück
+ }
+
+/**
+ * dictionary // Zuordnungstabelle für das Codebuch
+ */
+ // Diese rekursive Funktion erzeugt das Codebuch für die Huffman-Kodierung und speichert es in der Variable dictionary
+ function createDictionary(node, codeword, dictionary)
+{
+
+// (der Knoten ist node ist leer)
+// Abbruchbedingung, wenn kein linker oder rechter Teilbaum vorhanden ist
+if (node.empty())
+{return;}
+
+// Wenn der Knoten kein innerer Knoten, also ein Blatt ist
+// node->symbol is kein innerer Knoten, also ein Blatt
+if (node.leave())
+{
+// Fügt die Kombination aus Symbol und Codewort dem Codebuch hinzu
+dictionary.insert(node->symbol, codeword);
+return;
+}
+
+// Rekursive Aufruf für den linken Teilbaum, das Codesymbol 0 für die linke Kante wird angefügt
+createDictionary(node->left, concat(codeword, "0"), dictionary)
+// Rekursive Aufruf für den rechten Teilbaum, das Codesymbol 1 für die rechte Kante wird angefügt
+createDictionary(node->right, concat(codeword, "1"), dictionary)
+}

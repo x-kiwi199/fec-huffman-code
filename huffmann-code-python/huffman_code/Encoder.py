@@ -39,10 +39,10 @@ from .Codebook import Codebook
 
 class Encoder:
     def __init__(self) -> None:
-        self.message = None
+        self.message: str | None = None
 
-        self.codebook = None
-        self.codeword = None
+        self.codebook: Codebook | None = None
+        self.codeword: str | None = None
 
         self.logger = logging.getLogger("ENCODER")
         self.logger.debug("Initializing encoder")
@@ -52,6 +52,7 @@ class Encoder:
         if self.codebook is None:
             self.codebook = Codebook.from_message(message=message)
         else:
+            self.codebook = Codebook() # dummy
             self.logger.warning("Codebook update mechanism not yet implemented")
         self.codeword = self.codebook.map()
         self.logger.debug(f"> tx_message: {self.message}")

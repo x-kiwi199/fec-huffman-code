@@ -39,19 +39,20 @@ from .Codebook import Codebook
 
 class Decoder:
     def __init__(self) -> None:
-        self.codebook = None
-        self.codeword = None
+        self.codebook: Codebook | None = None
+        self.codeword: str | None = None
 
-        self.message = None
+        self.message: str | None = None
 
         self.logger = logging.getLogger("DECODER")
         self.logger.debug("Initializing decoder")
 
-    def decode(self, codeword: str, alphabet_soup: dict) -> str:
+    def decode(self, codeword: str, alphabet_soup: dict[str,int]) -> str:
         self.codeword = codeword
         if self.codebook is None:
             self.codebook = Codebook.from_stats(symbol_stats=alphabet_soup)
         else:
+            self.codebook = Codebook() # dummy
             self.logger.warning("Codebook update mechanism not yet implemented")
         self.codebook.codeword = codeword
         self.message = self.codebook.demap()

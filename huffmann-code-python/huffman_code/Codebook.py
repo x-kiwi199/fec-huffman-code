@@ -35,74 +35,20 @@
 # -----------------------------------------------------------------------
 
 import heapq
-from collections import Counter
 import itertools
-
-# class Codebook:
-#     def __init__(self):
-#         self.counterObj = None
-#         self.nodes = []
-#         self.mapping = {}
-#         self.demapping = {}
-#         self.tree = HuffmannTree()
-#         self.codeword = None
-#         self.message = None
-#
-#     def fit_from_message(self, message: str):
-#         """Build internal statistics and tree from a raw message."""
-#         self.message = message
-#         self.counterObj = Counter(message)
-#         self._build_tree()
-#
-#     def fit_from_stats(self, stats: dict):
-#         """Rebuild from externally provided statistics."""
-#         self.counterObj = Counter(stats)
-#         self._build_tree()
-#
-#     def _build_tree(self):
-#         self.nodes.clear()
-#         occurrence = sorted(self.counterObj.items(), key=lambda x: (x[1], x[0]))
-#         total = sum(self.counterObj.values())
-#         for symbol, count in occurrence:
-#             node = Node()
-#             node.set_symbol(symbol)
-#             node.set_probability(count / total)
-#             self.nodes.append(node)
-#         self.tree.generate(self.nodes)
-#         self.mapping = {n.get_symbol(): n.get_code() for n in self.nodes if n.get_symbol() is not None}
-#         self.demapping = {v: k for k, v in self.mapping.items()}
-#
-#     def map(self, message: str | None = None) -> str:
-#         if message:
-#             self.message = message
-#         if not self.message or not self.mapping:
-#             raise RuntimeError("Codebook not yet initialized with message or statistics.")
-#         self.codeword = ''.join(self.mapping[s] for s in self.message)
-#         return self.codeword
-#
-#     def demap(self, codeword: str | None = None) -> str:
-#         if codeword:
-#             self.codeword = codeword
-#         if not self.codeword or not self.demapping:
-#             raise RuntimeError("Codebook not yet initialized with statistics.")
-#         decoded, buffer = [], ""
-#         for bit in self.codeword:
-#             buffer += bit
-#             if buffer in self.demapping:
-#                 decoded.append(self.demapping[buffer])
-#                 buffer = ""
-#         return ''.join(decoded)
+from collections import Counter
+from typing import Optional, Dict, List, Tuple, cast
 
 class Codebook:
     def __init__(self) -> None:
-        self.role = None        # 'tx' or 'rx' role as codebook lives at runtime as two separated instances
-        self.codeword = None
-        self.message = None
+        self.role: Optional[str] = None  # 'tx' or 'rx'
+        self.codeword: Optional[str] = None
+        self.message: Optional[str] = None
 
-        self.counterObj = None
-        self.nodes = []
-        self.mapping = {}
-        self.demapping = {}
+        self.counterObj: Optional[Counter[str]] = None
+        self.nodes: List[Node] = []
+        self.mapping: Dict[str, str] = {}
+        self.demapping: Dict[str, str] = {}
         self.tree = HuffmannTree()
 
     @classmethod
@@ -110,14 +56,13 @@ class Codebook:
         obj = cls()
         obj.role = 'tx'
         obj.message = message
-        counter = Counter(message)
-        obj.counterObj = counter
+        obj.counterObj = Counter(message)
         obj.start()
         obj.tree.generate(obj.nodes)
         return obj
 
     @classmethod
-    def from_stats(cls, symbol_stats: dict) -> "Codebook":
+    def from_stats(cls, symbol_stats: Dict[str, int]) -> "Codebook":
         obj = cls()
         obj.role = 'rx'
         counter = Counter(symbol_stats)
@@ -127,37 +72,58 @@ class Codebook:
         return obj
 
     @staticmethod
-    def _to_bytes(message: str):
+    def _to_bytes(message: str) -> bytes:
         return message.encode(encoding='utf-8', errors='strict')
 
     @staticmethod
-    def _to_string(byte_message:bytes):
+    def _to_string(byte_message:bytes) -> str:
         return byte_message.decode(encoding='utf-8', errors='strict')
 
-    def _print_codeword(self):
+    def _print_codeword(self) -> None:
         print(self.codeword)
 
     def map(self) -> str:
-        symbol_to_code = {node.get_symbol(): node.get_code() for node in self.nodes if node.get_symbol() is not None}
+        if self.message is None:
+            raise ValueError("Message not initialized.")
+
+        symbol_to_code: Dict[str, str] = {}
+        for node in self.nodes:
+            sym = node.get_symbol()
+            code = node.get_code()
+            if sym is not None and code is not None:
+                symbol_to_code[sym] = code
+
         self.mapping = symbol_to_code
         self.codeword = ''.join(symbol_to_code[s] for s in self.message)
         return self.codeword
 
     def demap(self) -> str:
-        code_to_symbol = {node.get_code(): node.get_symbol() for node in self.nodes if node.get_symbol() is not None}
+        if self.codeword is None:
+            raise ValueError("Codeword not initialized.")
+
+        code_to_symbol: Dict[str, str] = {}
+        for node in self.nodes:
+            sym = node.get_symbol()
+            code = node.get_code()
+            if sym is not None and code is not None:
+                code_to_symbol[code] = sym
+
         buffer = ""
-        decoded = []
+        decoded: List[str] = []
         for bit in self.codeword:
             buffer += bit
             if buffer in code_to_symbol:
                 decoded.append(code_to_symbol[buffer])
                 buffer = ""
-        self.message = ''.join(decoded)
+        self.message = "".join(decoded)
         return self.message
 
-    def start(self):
+    def start(self) -> None:
+        if self.counterObj is None:
+            raise ValueError("counterObj not initialized.")
+
         occurrence = sorted(self.counterObj.items(), key=lambda x: (x[1], x[0]))  # sort by frequency, then symbol
-        total = sum(self.counterObj.values())
+        total: float = float(sum(self.counterObj.values()))
         for symbol, count in occurrence:
             node = Node()
             node.set_symbol(symbol)
@@ -166,43 +132,47 @@ class Codebook:
 
 class Node:
     def __init__(self) -> None:
-        self.probability = None
-        self.symbol = None
-        self.code = None
-        self.left = None
-        self.right = None
+        self.probability: Optional[float] = None
+        self.symbol: Optional[str] = None
+        self.code: Optional[str] = None
+        self.left: Optional["Node"] = None
+        self.right: Optional["Node"] = None
 
-    def set_probability(self, probability: float):
+    def set_probability(self, probability: float) -> None:
         self.probability = probability
 
-    def get_probability(self):
+    def get_probability(self) -> float:
+        if self.probability is None:
+            raise ValueError("Node probability not set")
         return self.probability
 
-    def set_symbol(self, symbol:str):
+    def set_symbol(self, symbol: Optional[str]) -> None:
         self.symbol = symbol
 
-    def get_symbol(self):
+    def get_symbol(self) -> Optional[str]:
         return self.symbol
 
-    def set_code(self, code:str):
+    def set_code(self, code: str) -> None:
         self.code = code
 
-    def get_code(self):
+    def get_code(self) -> Optional[str]:
         return self.code
 
 class HuffmannTree:
     def __init__(self) -> None:
-        self.heap = None
-        self.root = None
+        self.heap: list[list[float | int | Node]] | None = None
+        self.root: Node | None = None
 
-    def generate(self, nodes: list):
+    def generate(self, nodes: list[Node]) -> None:
         counter = itertools.count()         # Unique sequence number
         heap = [[node.get_probability(), next(counter), node] for node in nodes]
         heapq.heapify(heap)
 
         while len(heap) > 1:
-            left_prob, _, left_node = heapq.heappop(heap)
-            right_prob, _, right_node = heapq.heappop(heap)
+            left_tuple = cast(tuple[float, int, Node], heapq.heappop(heap))
+            right_tuple = cast(tuple[float, int, Node], heapq.heappop(heap))
+            left_prob, _, left_node = left_tuple
+            right_prob, _, right_node = right_tuple
 
             parent = Node()
             parent.set_probability(left_prob + right_prob)
@@ -212,11 +182,13 @@ class HuffmannTree:
 
             heapq.heappush(heap, [parent.get_probability(), next(counter), parent])
 
-        _, _, root = heap[0]
-        self.root = root
+        root_tuple = cast(tuple[float, int, Node], heap[0])
+        _, _, self.root = root_tuple
         self._assign_codes(self.root)
 
-    def _assign_codes(self, node, code=""):
+    def _assign_codes(self, node: Node | None, code: str="") -> None:
+        if node is None:
+            return
         if node.get_symbol() is not None:
             node.set_code(code)
             return
